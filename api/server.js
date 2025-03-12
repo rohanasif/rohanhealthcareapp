@@ -51,7 +51,7 @@ app.get("/api/doctors", (req, res) => {
 });
 
 // Routes
-app.use("/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 
 // MongoDB connection
 if (!process.env.MONGODB_URI) {

@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Box,
   Button,
@@ -10,12 +11,74 @@ import {
   InputAdornment,
   IconButton,
   MenuItem,
+  Alert,
 } from "@mui/material";
 import { Google, Facebook } from "@mui/icons-material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import { useAuth } from "@/contexts/AuthContext";
+import authService from "@/services/authService";
 
 export default function Register() {
   const [role, setRole] = useState("patient");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    dateOfBirth: "",
+    gender: "",
+    phone: "",
+    address: "",
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { login } = useAuth();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const userData = {
+        ...formData,
+        role,
+      };
+      const { token, user } = await authService.register(userData);
+      await login(user, token);
+      const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+      router.push(callbackUrl);
+    } catch (err) {
+      setError(err.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = () => {
+    const callbackUrl = searchParams.get("callbackUrl");
+    const redirectUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/google?role=${role}${
+      callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""
+    }`;
+    window.location.href = redirectUrl;
+  };
+
+  const handleFacebookLogin = () => {
+    const callbackUrl = searchParams.get("callbackUrl");
+    const redirectUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/facebook?role=${role}${
+      callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""
+    }`;
+    window.location.href = redirectUrl;
+  };
 
   return (
     <Box
@@ -104,6 +167,7 @@ export default function Register() {
               color: "primary.main",
             },
           }}
+          onClick={handleGoogleLogin}
         >
           Continue with Google
         </Button>
@@ -119,6 +183,7 @@ export default function Register() {
               color: "primary.main",
             },
           }}
+          onClick={handleFacebookLogin}
         >
           Continue with Facebook
         </Button>
@@ -131,6 +196,7 @@ export default function Register() {
       {/* Form Fields */}
       <Box
         component="form"
+        onSubmit={handleSubmit}
         sx={{
           display: "flex",
           flexDirection: "column",
@@ -139,13 +205,47 @@ export default function Register() {
           maxWidth: 400,
         }}
       >
-        <TextField label="Name" variant="outlined" fullWidth />
-        <TextField label="Email" type="email" variant="outlined" fullWidth />
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        <TextField
+          label="Name"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          variant="outlined"
+          fullWidth
+          required
+          disabled={loading}
+        />
+        <TextField
+          label="Email"
+          name="email"
+          type="email"
+          value={formData.email}
+          onChange={handleChange}
+          variant="outlined"
+          fullWidth
+          required
+          disabled={loading}
+        />
 
         <TextField
           label="Date of Birth"
+          name="dateOfBirth"
+          type="date"
+          value={formData.dateOfBirth}
+          onChange={handleChange}
           variant="outlined"
           fullWidth
+          required
+          disabled={loading}
+          InputLabelProps={{
+            shrink: true,
+          }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -159,9 +259,13 @@ export default function Register() {
 
         <TextField
           label="Gender"
+          name="gender"
           select
+          value={formData.gender}
+          onChange={handleChange}
           fullWidth
-          defaultValue=""
+          required
+          disabled={loading}
           variant="outlined"
         >
           <MenuItem value="male">Male</MenuItem>
@@ -169,26 +273,51 @@ export default function Register() {
           <MenuItem value="other">Other</MenuItem>
         </TextField>
 
-        <TextField label="Phone" type="tel" variant="outlined" fullWidth />
-        <TextField label="Address" variant="outlined" fullWidth />
         <TextField
-          label="Password"
-          type="password"
+          label="Phone"
+          name="phone"
+          type="tel"
+          value={formData.phone}
+          onChange={handleChange}
           variant="outlined"
           fullWidth
+          required
+          disabled={loading}
+        />
+        <TextField
+          label="Address"
+          name="address"
+          value={formData.address}
+          onChange={handleChange}
+          variant="outlined"
+          fullWidth
+          required
+          disabled={loading}
+        />
+        <TextField
+          label="Password"
+          name="password"
+          type="password"
+          value={formData.password}
+          onChange={handleChange}
+          variant="outlined"
+          fullWidth
+          required
+          disabled={loading}
         />
 
         <Button
           type="submit"
           variant="contained"
           fullWidth
+          disabled={loading}
           sx={{
             mt: 2,
             bgcolor: "primary.main",
             "&:hover": { bgcolor: "primary.dark" },
           }}
         >
-          Register
+          {loading ? "Registering..." : "Register"}
         </Button>
 
         <Typography

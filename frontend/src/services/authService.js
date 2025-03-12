@@ -1,7 +1,7 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 // Create axios instance with default config
 const api = axios.create({
@@ -60,7 +60,7 @@ api.interceptors.response.use(
 const authService = {
   async register(userData) {
     try {
-      const response = await api.post("/auth/register", userData);
+      const response = await api.post("/api/auth/register", userData);
       return response.data;
     } catch (error) {
       throw error.message || "Registration failed";
@@ -69,7 +69,7 @@ const authService = {
 
   async login(email, password) {
     try {
-      const response = await api.post("/auth/login", {
+      const response = await api.post("/api/auth/login", {
         email,
         password,
       });
@@ -81,7 +81,7 @@ const authService = {
 
   async handleSocialAuthCallback(token) {
     try {
-      const response = await api.post("/auth/verify-token", { token });
+      const response = await api.post("/api/auth/verify-token", { token });
       return response.data;
     } catch (error) {
       throw error.message || "Social authentication failed";
@@ -90,7 +90,7 @@ const authService = {
 
   async verifyToken(token) {
     try {
-      const response = await api.post("/auth/verify-token", { token });
+      const response = await api.post("/api/auth/verify-token", { token });
       return response.data;
     } catch (error) {
       throw error.message || "Token verification failed";
