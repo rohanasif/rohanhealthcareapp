@@ -24,6 +24,11 @@ const userSchema = new mongoose.Schema({
     enum: ["patient", "doctor", "admin"],
     required: true,
   },
+  authType: {
+    type: String,
+    enum: ["basic", "google", "facebook"],
+    default: "basic",
+  },
   dateOfBirth: Date,
   gender: {
     type: String,

@@ -89,7 +89,14 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     // Check if user exists
-    const user = await User.findOne({ email, authType: "basic" });
+    const user = await User.findOne({
+      email,
+      $or: [
+        { authType: "basic" },
+        { authType: { $exists: false } }, // For existing users without authType
+      ],
+    });
+
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -98,6 +105,12 @@ router.post("/login", async (req, res) => {
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Ensure user has authType set
+    if (!user.authType) {
+      user.authType = "basic";
+      await user.save();
     }
 
     // Generate JWT
