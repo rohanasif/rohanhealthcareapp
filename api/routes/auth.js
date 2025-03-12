@@ -137,21 +137,23 @@ router.post("/login", async (req, res) => {
 
 // Google OAuth Routes
 router.get("/google", (req, res, next) => {
-  const { role } = req.query;
-  if (role) {
-    req.session = req.session || {};
-    req.session.oauthRole = role;
-  }
-  passport.authenticate("google", { scope: ["profile", "email"] })(
-    req,
-    res,
-    next,
-  );
+  const { role, callbackUrl } = req.query;
+  req.session = req.session || {};
+  req.session.oauthRole = role;
+  req.session.callbackUrl = callbackUrl;
+
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    prompt: "select_account",
+  })(req, res, next);
 });
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { session: false }),
+  passport.authenticate("google", {
+    session: false,
+    failureRedirect: "/auth/signin?error=Google%20authentication%20failed",
+  }),
   (req, res) => {
     const token = jwt.sign(
       { userId: req.user._id, role: req.user.role },
@@ -159,8 +161,7 @@ router.get(
       { expiresIn: "24h" },
     );
 
-    const callbackUrl = req.query.callbackUrl || "";
-    // Redirect to frontend with token and callback URL
+    const callbackUrl = req.session?.callbackUrl || "";
     res.redirect(
       `${process.env.FRONTEND_URL}/auth/success?token=${token}${
         callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""
@@ -171,17 +172,23 @@ router.get(
 
 // Facebook OAuth Routes
 router.get("/facebook", (req, res, next) => {
-  const { role } = req.query;
-  if (role) {
-    req.session = req.session || {};
-    req.session.oauthRole = role;
-  }
-  passport.authenticate("facebook", { scope: ["email"] })(req, res, next);
+  const { role, callbackUrl } = req.query;
+  req.session = req.session || {};
+  req.session.oauthRole = role;
+  req.session.callbackUrl = callbackUrl;
+
+  passport.authenticate("facebook", {
+    scope: ["email"],
+    prompt: "select_account",
+  })(req, res, next);
 });
 
 router.get(
   "/facebook/callback",
-  passport.authenticate("facebook", { session: false }),
+  passport.authenticate("facebook", {
+    session: false,
+    failureRedirect: "/auth/signin?error=Facebook%20authentication%20failed",
+  }),
   (req, res) => {
     const token = jwt.sign(
       { userId: req.user._id, role: req.user.role },
@@ -189,8 +196,7 @@ router.get(
       { expiresIn: "24h" },
     );
 
-    const callbackUrl = req.query.callbackUrl || "";
-    // Redirect to frontend with token and callback URL
+    const callbackUrl = req.session?.callbackUrl || "";
     res.redirect(
       `${process.env.FRONTEND_URL}/auth/success?token=${token}${
         callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""

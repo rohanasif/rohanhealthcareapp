@@ -93,7 +93,7 @@ const authService = {
       const response = await api.post("/api/auth/verify-token", { token });
       return response.data;
     } catch (error) {
-      throw error.message || "Token verification failed";
+      throw error.response?.data?.message || "Token verification failed";
     }
   },
 

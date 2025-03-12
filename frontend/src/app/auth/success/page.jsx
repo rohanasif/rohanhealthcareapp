@@ -18,17 +18,17 @@ export default function AuthSuccess() {
           throw new Error("No token provided");
         }
 
-        const data = await authService.handleSocialAuthCallback(token);
+        const data = await authService.verifyToken(token);
         await login(data.user, token);
 
-        // Get the callback URL from the OAuth redirect
         const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
-        router.push(callbackUrl);
+        router.push(decodeURIComponent(callbackUrl));
       } catch (error) {
         console.error("Auth error:", error);
         router.push(
-          "/auth/signin?error=" +
-            encodeURIComponent(error.message || "Authentication failed"),
+          `/auth/signin?error=${encodeURIComponent(
+            error.message || "Authentication failed",
+          )}`,
         );
       }
     };
