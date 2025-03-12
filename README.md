@@ -16,6 +16,50 @@ A modern healthcare platform that connects patients with doctors, facilitating e
 - Password reset functionality
 - Email verification system
 
+#### Authentication Acceptance Criteria
+
+##### Google OAuth
+
+- Users can sign in using their Google account
+- Application requests necessary permissions (email, profile)
+- Successfully creates new user account on first login
+- Properly links existing accounts with matching email
+- Redirects to home page after successful authentication
+- Handles authentication errors gracefully
+- Maintains session across page refreshes
+
+##### Facebook OAuth
+
+- Users can sign in using their Facebook account
+- Application requests required permissions (email, public_profile)
+- Creates new user account on first login
+- Links to existing accounts with matching email
+- Properly handles cases where email is not provided
+- Uses fallback email format (facebookId@facebook.com) when email is missing
+- Redirects to home page after successful authentication
+- Handles authentication errors with appropriate messages
+- Maintains session state properly
+
+##### Email/Password Authentication
+
+- Users can register with email and password
+- Validates email format and password strength
+- Prevents duplicate email registrations
+- Securely hashes passwords before storage
+- Allows users to sign in with registered credentials
+- Provides appropriate error messages for invalid credentials
+- Maintains session using JWT tokens
+- Allows users to sign out
+
+##### General Authentication Requirements
+
+- Secure session management
+- Protected route access for authenticated users
+- Proper error handling and user feedback
+- Responsive design for authentication forms
+- Cross-browser compatibility
+- Mobile-friendly authentication flows
+
 ### User Management
 
 - Comprehensive user profiles for both patients and doctors
