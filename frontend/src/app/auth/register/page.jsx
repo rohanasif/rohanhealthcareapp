@@ -23,7 +23,7 @@ export default function Register() {
       flexDirection="column"
       alignItems="center"
       minHeight="100vh"
-      sx={{ p: 4 }}
+      padding="4px"
     >
       <Box sx={{ display: "flex", gap: 1, alignItems: "baseline", mb: 1 }}>
         <Typography variant="h4" component="span">
