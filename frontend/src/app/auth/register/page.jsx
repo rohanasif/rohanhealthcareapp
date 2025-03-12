@@ -55,7 +55,7 @@ export default function Register() {
       };
       const { token, user } = await authService.register(userData);
       await login(user, token);
-      const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+      const callbackUrl = searchParams.get("callbackUrl") || "/";
       router.push(callbackUrl);
     } catch (err) {
       setError(err.message || "Registration failed");

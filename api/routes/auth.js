@@ -179,29 +179,50 @@ router.get("/facebook", (req, res, next) => {
 
   passport.authenticate("facebook", {
     scope: ["email"],
-    prompt: "select_account",
+    profileFields: ["id", "emails", "name"],
   })(req, res, next);
 });
 
 router.get(
   "/facebook/callback",
-  passport.authenticate("facebook", {
-    session: false,
-    failureRedirect: "/auth/signin?error=Facebook%20authentication%20failed",
-  }),
+  (req, res, next) => {
+    passport.authenticate("facebook", {
+      session: false,
+      failureRedirect: "/auth/signin?error=Facebook%20authentication%20failed",
+    })(req, res, (err) => {
+      if (err) {
+        console.error("Facebook auth error:", err);
+        return res.redirect(
+          `${process.env.FRONTEND_URL}/auth/signin?error=${encodeURIComponent(
+            err.message || "Facebook authentication failed",
+          )}`,
+        );
+      }
+      next();
+    });
+  },
   (req, res) => {
-    const token = jwt.sign(
-      { userId: req.user._id, role: req.user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "24h" },
-    );
+    try {
+      const token = jwt.sign(
+        { userId: req.user._id, role: req.user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "24h" },
+      );
 
-    const callbackUrl = req.session?.callbackUrl || "";
-    res.redirect(
-      `${process.env.FRONTEND_URL}/auth/success?token=${token}${
-        callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""
-      }`,
-    );
+      const callbackUrl = req.session?.callbackUrl || "";
+      res.redirect(
+        `${process.env.FRONTEND_URL}/auth/success?token=${token}${
+          callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""
+        }`,
+      );
+    } catch (error) {
+      console.error("Token generation error:", error);
+      res.redirect(
+        `${process.env.FRONTEND_URL}/auth/signin?error=${encodeURIComponent(
+          "Failed to complete authentication",
+        )}`,
+      );
+    }
   },
 );
 

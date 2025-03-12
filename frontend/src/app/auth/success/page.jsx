@@ -21,7 +21,7 @@ export default function AuthSuccess() {
         const data = await authService.verifyToken(token);
         await login(data.user, token);
 
-        const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+        const callbackUrl = searchParams.get("callbackUrl") || "/";
         router.push(decodeURIComponent(callbackUrl));
       } catch (error) {
         console.error("Auth error:", error);

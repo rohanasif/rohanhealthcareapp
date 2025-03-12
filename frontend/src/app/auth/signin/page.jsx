@@ -29,7 +29,7 @@ export default function SignIn() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+      const callbackUrl = searchParams.get("callbackUrl") || "/";
       router.push(callbackUrl);
     }
   }, [isAuthenticated, router, searchParams]);
@@ -42,7 +42,7 @@ export default function SignIn() {
     try {
       const { token, user } = await authService.login(email, password);
       await login(user, token);
-      const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+      const callbackUrl = searchParams.get("callbackUrl") || "/";
       router.push(callbackUrl);
     } catch (err) {
       setError(err.message || "Failed to sign in");

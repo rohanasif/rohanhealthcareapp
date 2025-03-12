@@ -60,7 +60,7 @@ api.interceptors.response.use(
 const authService = {
   async register(userData) {
     try {
-      const response = await api.post("/api/auth/register", userData);
+      const response = await api.post("/auth/register", userData);
       return response.data;
     } catch (error) {
       throw error.message || "Registration failed";
@@ -69,7 +69,7 @@ const authService = {
 
   async login(email, password) {
     try {
-      const response = await api.post("/api/auth/login", {
+      const response = await api.post("/auth/login", {
         email,
         password,
       });
@@ -81,7 +81,7 @@ const authService = {
 
   async handleSocialAuthCallback(token) {
     try {
-      const response = await api.post("/api/auth/verify-token", { token });
+      const response = await api.post("/auth/verify-token", { token });
       return response.data;
     } catch (error) {
       throw error.message || "Social authentication failed";
@@ -90,7 +90,7 @@ const authService = {
 
   async verifyToken(token) {
     try {
-      const response = await api.post("/api/auth/verify-token", { token });
+      const response = await api.post("/auth/verify-token", { token });
       return response.data;
     } catch (error) {
       throw error.response?.data?.message || "Token verification failed";

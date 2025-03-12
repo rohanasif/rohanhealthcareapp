@@ -75,13 +75,6 @@ export default function Navbar() {
                   horizontal: "right",
                 }}
               >
-                <MenuItem
-                  component={Link}
-                  href="/dashboard"
-                  onClick={handleClose}
-                >
-                  Dashboard
-                </MenuItem>
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
               </Menu>
             </>
