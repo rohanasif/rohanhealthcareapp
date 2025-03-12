@@ -123,10 +123,18 @@ router.post("/login", async (req, res) => {
 });
 
 // Google OAuth Routes
-router.get(
-  "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] }),
-);
+router.get("/google", (req, res, next) => {
+  const { role } = req.query;
+  if (role) {
+    req.session = req.session || {};
+    req.session.oauthRole = role;
+  }
+  passport.authenticate("google", { scope: ["profile", "email"] })(
+    req,
+    res,
+    next,
+  );
+});
 
 router.get(
   "/google/callback",
@@ -138,16 +146,25 @@ router.get(
       { expiresIn: "24h" },
     );
 
-    // Redirect to frontend with token
-    res.redirect(`${process.env.FRONTEND_URL}/auth/success?token=${token}`);
+    const callbackUrl = req.query.callbackUrl || "";
+    // Redirect to frontend with token and callback URL
+    res.redirect(
+      `${process.env.FRONTEND_URL}/auth/success?token=${token}${
+        callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""
+      }`,
+    );
   },
 );
 
 // Facebook OAuth Routes
-router.get(
-  "/facebook",
-  passport.authenticate("facebook", { scope: ["email"] }),
-);
+router.get("/facebook", (req, res, next) => {
+  const { role } = req.query;
+  if (role) {
+    req.session = req.session || {};
+    req.session.oauthRole = role;
+  }
+  passport.authenticate("facebook", { scope: ["email"] })(req, res, next);
+});
 
 router.get(
   "/facebook/callback",
@@ -159,9 +176,44 @@ router.get(
       { expiresIn: "24h" },
     );
 
-    // Redirect to frontend with token
-    res.redirect(`${process.env.FRONTEND_URL}/auth/success?token=${token}`);
+    const callbackUrl = req.query.callbackUrl || "";
+    // Redirect to frontend with token and callback URL
+    res.redirect(
+      `${process.env.FRONTEND_URL}/auth/success?token=${token}${
+        callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""
+      }`,
+    );
   },
 );
+
+// Verify token endpoint for OAuth callbacks
+router.post("/verify-token", async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) {
+      return res.status(400).json({ message: "Token is required" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(401).json({ message: "Invalid token" });
+  }
+});
 
 export default router;

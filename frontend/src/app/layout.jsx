@@ -1,5 +1,6 @@
 import { Raleway, Open_Sans } from "next/font/google";
 import ThemeRegistry from "@/components/ThemeRegistry/ThemeRegistry";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 // Load fonts
 const raleway = Raleway({
@@ -22,7 +23,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${raleway.variable} ${openSans.variable}`}>
       <body>
-        <ThemeRegistry>{children}</ThemeRegistry>
+        <ThemeRegistry>
+          <AuthProvider>{children}</AuthProvider>
+        </ThemeRegistry>
       </body>
     </html>
   );

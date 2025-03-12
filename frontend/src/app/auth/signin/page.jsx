@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Box,
   Button,
@@ -9,11 +10,62 @@ import {
   Typography,
   InputAdornment,
   IconButton,
+  Alert,
 } from "@mui/material";
 import { Google, Facebook } from "@mui/icons-material";
+import { useAuth } from "@/contexts/AuthContext";
+import authService from "@/services/authService";
 
 export default function SignIn() {
   const [role, setRole] = useState("patient");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { login, isAuthenticated } = useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+      router.push(callbackUrl);
+    }
+  }, [isAuthenticated, router, searchParams]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const { token, user } = await authService.login(email, password);
+      await login(user, token);
+      const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+      router.push(callbackUrl);
+    } catch (err) {
+      setError(err.message || "Failed to sign in");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = () => {
+    const callbackUrl = searchParams.get("callbackUrl");
+    const redirectUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/google?role=${role}${
+      callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""
+    }`;
+    window.location.href = redirectUrl;
+  };
+
+  const handleFacebookLogin = () => {
+    const callbackUrl = searchParams.get("callbackUrl");
+    const redirectUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/facebook?role=${role}${
+      callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""
+    }`;
+    window.location.href = redirectUrl;
+  };
 
   return (
     <Box
@@ -39,11 +91,17 @@ export default function SignIn() {
         Please sign in to continue.
       </Typography>
 
+      {error && (
+        <Alert severity="error" sx={{ mb: 2, width: "100%", maxWidth: 400 }}>
+          {error}
+        </Alert>
+      )}
+
       {/* Role Selection */}
       <ToggleButtonGroup
         value={role}
         exclusive
-        onChange={(e, newRole) => setRole(newRole)}
+        onChange={(e, newRole) => newRole && setRole(newRole)}
         sx={{
           backgroundColor: "primary.main",
           borderRadius: 2,
@@ -94,6 +152,8 @@ export default function SignIn() {
           fullWidth
           variant="outlined"
           startIcon={<Google />}
+          onClick={handleGoogleLogin}
+          disabled={loading}
           sx={{
             color: "text.primary",
             borderColor: "divider",
@@ -109,6 +169,8 @@ export default function SignIn() {
           fullWidth
           variant="outlined"
           startIcon={<Facebook />}
+          onClick={handleFacebookLogin}
+          disabled={loading}
           sx={{
             color: "text.primary",
             borderColor: "divider",
@@ -129,6 +191,7 @@ export default function SignIn() {
       {/* Form Fields */}
       <Box
         component="form"
+        onSubmit={handleSubmit}
         sx={{
           display: "flex",
           flexDirection: "column",
@@ -143,6 +206,10 @@ export default function SignIn() {
           variant="outlined"
           fullWidth
           autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          disabled={loading}
         />
         <TextField
           label="Password"
@@ -150,19 +217,24 @@ export default function SignIn() {
           variant="outlined"
           fullWidth
           autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          disabled={loading}
         />
 
         <Button
           type="submit"
           variant="contained"
           fullWidth
+          disabled={loading}
           sx={{
             mt: 2,
             bgcolor: "primary.main",
             "&:hover": { bgcolor: "primary.dark" },
           }}
         >
-          Sign In
+          {loading ? "Signing in..." : "Sign In"}
         </Button>
 
         <Typography
