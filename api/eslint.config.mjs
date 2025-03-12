@@ -5,7 +5,6 @@ import eslintConfigPrettier from "eslint-config-prettier/flat";
 /** @type {import('eslint').Linter.Config[]} */
 export default [
   { languageOptions: { globals: globals.node } },
-  // Override Jest globals for test files only
   {
     files: ["**/*.test.js", "**/*.test.ts", "**/*.spec.js", "**/*.spec.ts"],
     languageOptions: {
@@ -15,7 +14,14 @@ export default [
   pluginJs.configs.recommended,
   {
     rules: {
-      "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+      "no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          caughtErrors: "all",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
     },
   },
   eslintConfigPrettier,
