@@ -9,12 +9,10 @@ import {
   Typography,
   InputAdornment,
   IconButton,
-  MenuItem,
 } from "@mui/material";
 import { Google, Facebook } from "@mui/icons-material";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
-export default function Register() {
+export default function SignIn() {
   const [role, setRole] = useState("patient");
 
   return (
@@ -38,7 +36,7 @@ export default function Register() {
         </Typography>
       </Box>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Welcome back! Please enter your details.
+        Please sign in to continue.
       </Typography>
 
       {/* Role Selection */}
@@ -139,43 +137,19 @@ export default function Register() {
           maxWidth: 400,
         }}
       >
-        <TextField label="Name" variant="outlined" fullWidth />
-        <TextField label="Email" type="email" variant="outlined" fullWidth />
-
         <TextField
-          label="Date of Birth"
+          label="Email"
+          type="email"
           variant="outlined"
           fullWidth
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton>
-                  <CalendarTodayIcon color="primary" />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
+          autoComplete="email"
         />
-
-        <TextField
-          label="Gender"
-          select
-          fullWidth
-          defaultValue=""
-          variant="outlined"
-        >
-          <MenuItem value="male">Male</MenuItem>
-          <MenuItem value="female">Female</MenuItem>
-          <MenuItem value="other">Other</MenuItem>
-        </TextField>
-
-        <TextField label="Phone" type="tel" variant="outlined" fullWidth />
-        <TextField label="Address" variant="outlined" fullWidth />
         <TextField
           label="Password"
           type="password"
           variant="outlined"
           fullWidth
+          autoComplete="current-password"
         />
 
         <Button
@@ -188,7 +162,7 @@ export default function Register() {
             "&:hover": { bgcolor: "primary.dark" },
           }}
         >
-          Register
+          Sign In
         </Button>
 
         <Typography
@@ -197,10 +171,10 @@ export default function Register() {
           align="center"
           sx={{ mt: 2 }}
         >
-          Already have an account?{" "}
+          Don't have an account?{" "}
           <Typography
             component="a"
-            href="/auth/signin"
+            href="/auth/register"
             variant="body2"
             sx={{
               color: "primary.main",
@@ -210,7 +184,7 @@ export default function Register() {
               },
             }}
           >
-            Sign in here
+            Register here
           </Typography>
         </Typography>
       </Box>
