@@ -103,30 +103,39 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
           }
 
           const role = req.session?.oauthRole || "patient";
-          const email = profile.emails[0].value;
+
+          // Handle case where email might not be available
+          const email =
+            profile.emails?.[0]?.value || `${profile.id}@facebook.com`;
+
           const existingEmailUser = await User.findOne({ email });
 
           if (existingEmailUser) {
             existingEmailUser.facebook = {
               id: profile.id,
-              email: profile.emails[0].value,
+              email: email,
             };
             await existingEmailUser.save();
             return done(null, existingEmailUser);
           }
 
+          // Create new user with available data
           const newUser = await new User({
             email,
-            name: `${profile.name.givenName} ${profile.name.familyName}`,
+            name:
+              profile.displayName ||
+              `${profile.name?.givenName || ""} ${profile.name?.familyName || ""}`.trim() ||
+              "Facebook User",
             role,
             facebook: {
               id: profile.id,
-              email: profile.emails[0].value,
+              email: email,
             },
           }).save();
 
           done(null, newUser);
         } catch (error) {
+          console.error("Facebook auth error:", error);
           done(error, null);
         }
       },

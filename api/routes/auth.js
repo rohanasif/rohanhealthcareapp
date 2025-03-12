@@ -178,8 +178,9 @@ router.get("/facebook", (req, res, next) => {
   req.session.callbackUrl = callbackUrl;
 
   passport.authenticate("facebook", {
-    scope: ["email"],
+    scope: ["email", "public_profile"],
     profileFields: ["id", "emails", "name"],
+    display: "popup",
   })(req, res, next);
 });
 
