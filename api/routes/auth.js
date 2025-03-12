@@ -2,7 +2,7 @@ import express from "express";
 import passport from "passport";
 import jwt from "jsonwebtoken";
 import { check, validationResult } from "express-validator";
-import User from "../api/models/User.js";
+import User from "../models/User.js";
 
 const router = express.Router();
 
